@@ -25,7 +25,7 @@ setuptools.setup(
     author_email='eudesrodrigo@outlook.com',
     description=(
         'Biblioteca em Python com o objetivo de facilitar o acesso a '
-        'dados financeiros periódicos de empresas brasileiras(B3/CVM).'
+        'dados financeiros periodicos de empresas brasileiras(B3/CVM).'
     ),
     long_description=long_description,
     long_description_content_type='text/markdown',
