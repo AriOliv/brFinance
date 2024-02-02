@@ -26,29 +26,35 @@ $ pip install brfinance
 ## Como utilizar
 Veja como é simples utilizar:
 ```python
-from cvm import CVMAsyncBackend, http_client, connector
-
+from brfinance import CVMAsyncBackend
+import pandas as pd
 from datetime import datetime, date
 
 
 cvm_httpclient = CVMAsyncBackend()
 
-# Realizando busca por Empresa
+# Dict de códigos CVM para todas as empresas
+cvm_codes = cvm_httpclient.get_cvm_codes()
+print(cvm_codes)
 
-start_date = date(2010, 1, 1)
-end_dt = date(2022, 1, 1)
-cvm_codes_string = "021610" # B3
-report_type = "EST_4" # Código de categoria para DFP
+# Dict de todas as categorias de busca disponíveis (Fato relevante, DFP, ITR, etc.)
+categories = cvm_httpclient.get_consulta_externa_cvm_categories()
+print(categories)
+
+# Realizando busca por Empresa
+start_date = date(2020, 1, 1)
+end_dt = date.today()
+cvm_codes_list = ['21610'] # B3
+category = ["EST_4", "EST_3", "IPE_4_-1_-1"] # Códigos de categoria para DFP, ITR e fatos relevantes
 last_ref_date = False # Se "True" retorna apenas o último report no intervalo de datas
-reports_list = None # Se None retorna todos os demonstrativos disponíveis.
 
 # Busca
 search_result = cvm_httpclient.get_consulta_externa_cvm_results(
-    cod_cvm=cvm_codes_string,
+    cod_cvm=cvm_codes_list,
     start_date=start_date,
     end_date=end_dt,
     last_ref_date=last_ref_date,
-    report_type=report_type
+    category=category
     )
 
 # Filtrar dataframe de busca para DFP e ITR apenas
@@ -56,6 +62,15 @@ search_result = search_result[
     (search_result['categoria']=="DFP - Demonstrações Financeiras Padronizadas") |
     (search_result['categoria']=="ITR - Informações Trimestrais")]
 search_result = search_result[pd.to_numeric(search_result['numero_seq_documento'], errors='coerce').notnull()]
+
+reports_list = [
+    'Balanço Patrimonial Ativo',
+    'Balanço Patrimonial Passivo',
+    'Demonstração do Resultado',
+    'Demonstração do Resultado Abrangente',
+    'Demonstração do Fluxo de Caixa',
+    'Demonstração das Mutações do Patrimônio Líquido',
+    'Demonstração de Valor Adicionado'] # Se None retorna todos os demonstrativos disponíveis.
 
 # Obter demonstrativos
 for index, row in search_result.iterrows():
@@ -79,8 +94,19 @@ Através da classe de client `CVMAsyncBackend`, você terá acesso as seguintes 
 | get_cvm_codes      | - | Obtém os códigos cvm disponíveis para todas as empresas. Retorna um dicionário com o código CVM de chave e o nome da empresa. |
 | get_consulta_externa_cvm_categories      | - |   Obtém os códigos para as categorias de busca disponíveis, dentre elas "DFP", "ITR", etc. Retorna um dicionário com o código da busca e a descrição. |
 | get_consulta_externa_cvm_results | cod_cvm, start_date, end_date, last_ref_date, report_type | Obtém o resultado da busca para os dados informados. Retorna um dataframe com os resultados.|
-| get_report | numero_seq_documento, codigo_tipo_instituicao | Utilizado para obter todos os demonstrativos de uma empresa na CVM. Retorna um dicionário com os nomes e os valores dos demonstrativos em um dataframe. |
+| get_report | numero_seq_documento, codigo_tipo_instituicao, reports_list, previous_results | Utilizado para obter todos os demonstrativos de uma empresa na CVM. Retorna um dicionário com os nomes e os valores dos demonstrativos em um dataframe. |
 
+
+### Upload PyPi
+```
+pip install twine
+```
+```
+python setup.py sdist
+```
+```
+C:\Users\eudes\AppData\Roaming\Python\Python310\Scripts\twine
+```
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
 [contributors-shield]: https://img.shields.io/github/contributors/eudesrodrigo/brFinance.svg?style=for-the-badge

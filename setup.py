@@ -13,14 +13,15 @@ install_requires = [
     'requests',
     'pandas',
     'beautifulsoup4',
+    'lxml'
 ]
 
 
 setuptools.setup(
     name='brfinance',
-    version='0.0.1',
+    version='0.0.9',
     packages=setuptools.find_packages(),
-    python_requires='>=3.7.*',
+    python_requires='>=3.7',
     author='Eudes Rodrigo Nunes de Oliveira',
     author_email='eudesrodrigo@outlook.com',
     description=(
@@ -30,7 +31,7 @@ setuptools.setup(
     long_description=long_description,
     long_description_content_type='text/markdown',
     url='https://github.com/eudesrodrigo/brFinance',
-    download_url='https://github.com/eudesrodrigo/brFinance/archive/refs/tags/0.0.1.tar.gz',
+    download_url='https://github.com/eudesrodrigo/brFinance/archive/refs/tags/0.0.5.tar.gz',
     install_requires=install_requires,
     classifiers=[
         'License :: OSI Approved :: Apache Software License',
