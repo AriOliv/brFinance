@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 
 
 class CVMHttpClient():
-    ENETCONSULTA_URL = "https://www.rad.cvm.gov.br/ENETCONSULTA/"
+    ENETCONSULTA_URL = "https://www.rad.cvm.gov.br/ENET/"
     LISTAR_DOCUMENTOS_URL = f"{ENET_URL}frmConsultaExternaCVM.aspx/ListarDocumentos"
     ENET_CONSULTA_EXTERNA = f"{ENET_URL}frmConsultaExternaCVM.aspx"
 
