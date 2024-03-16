@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 
 
 class CVMHttpClient():
-    ENETCONSULTA_URL = "https://www.rad.cvm.gov.br/ENETCONSULTA/"
+    ENETCONSULTA_URL = "https://www.rad.cvm.gov.br/ENET/"#"https://www.rad.cvm.gov.br/ENETCONSULTA/"
     LISTAR_DOCUMENTOS_URL = f"{ENET_URL}frmConsultaExternaCVM.aspx/ListarDocumentos"
     ENET_CONSULTA_EXTERNA = f"{ENET_URL}frmConsultaExternaCVM.aspx"
 
@@ -105,7 +105,15 @@ class CVMHttpClient():
         response = self.session.get(
             url, headers=headers, data=payload, verify=False)
 
+        # print("URL",url)
+        # print("**********************")
+        # print("RESPONSE",response.text)
+        # print("**********************")
+
         soup = BeautifulSoup(response.text, features="lxml")
+
+        print(soup.find(id='hdnNumeroSequencialDocumento').attrs)
+
         hdnNumeroSequencialDocumento = soup.find(
             id='hdnNumeroSequencialDocumento').attrs["value"]
         hdnCodigoTipoDocumento = soup.find(
@@ -134,10 +142,15 @@ class CVMHttpClient():
             if (item.getText() in reports_list):
                 report_url = self.ENETCONSULTA_URL + \
                     item.attrs["value"] + end_of_report_url
+                
                 report_html_response = self.session.get(
                     report_url, headers=headers, verify=False)
+                
                 reports[item.getText()] = report_html_response
-
+                # print("REP -->",report_url)
+                # print("RESP --->",report_html_response.text)
+                # print("UEIOA",reports[item.getText()].text)
+        # print("REPORTS",reports)
         return reports
 
     def get_enet_consulta_externa(self):

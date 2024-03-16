@@ -66,6 +66,7 @@ class CVMAsyncBackend():
             NumeroSequencialDocumento,
             CodigoTipoInstituicao,
             reports_list)
+        
         response_class = GetReportResponse(response=response, previous_results=previous_results)
 
         return response_class.data()

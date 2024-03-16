@@ -75,7 +75,9 @@ class GetSearchResponse():
                 search_results_df = search_results_df.replace(
                     {'</spanOrder>': ''}, regex=True).sort_values('data_entrega', ascending=False)
 
-                response_df = response_df.append(search_results_df)
+                # response_df = response_df.append(search_results_df)
+                response_df = pd.concat([response_df,search_results_df], ignore_index=True)
+
 
         return response_df
 
@@ -86,6 +88,7 @@ class GetReportResponse():
         self.previous_results = previous_results
 
     def data(self):
+
         data = {}
         for key in self.response.keys():
             html = self.response[key]
@@ -109,24 +112,26 @@ class GetReportResponse():
         if statement == "Demonstração das Mutações do Patrimônio Líquido":
             table_index = 1
 
-        df = pd.read_html(html, header=0, decimal=',')[table_index]
+        df = pd.read_html(io.StringIO(html), header=0, decimal=',')[table_index]
         converters = {c: lambda x: str(x) for c in df.columns}
-        df = pd.read_html(html, header=0, decimal=',',
+        df = pd.read_html(io.StringIO(html), header=0, decimal=',',
                           converters=converters)[table_index]
-
+        print(html)
         for ind, column in enumerate(df.columns):
             if column.strip() != "Conta" and column.strip() != "Descrição":
-                df[column] = df[column].astype(
-                    str).str.strip().str.replace(".", "", regex=True)
+                df[column] = df[column].astype(str).str.strip().str.replace(".", "", regex=False)
                 df[column] = pd.to_numeric(df[column], errors='coerce')
             else:
                 df[column] = df[column].astype(str).str.strip().astype(str)
 
         if statement != "Demonstração das Mutações do Patrimônio Líquido":
             if not self.previous_results:
+                # print("DATAFRAME",df)
                 # Get first column (most recent data available)
                 df = df.iloc[:, 0:3]
-                df.set_axis([*df.columns[:-1], 'Valor'], axis=1, inplace=True)
+                # df.set_axis([*df.columns[:-1], 'Valor'], axis=1, inplace=True)
+
+                df = df.set_axis([*df.columns[:-1], 'Valor'], axis=1)
 
         # df["refDate"] = reference_date
         #df["refDate"] = pd.to_datetime(df["refDate"], errors="coerce")
