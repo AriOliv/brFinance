@@ -15,10 +15,10 @@ class GetSearchResponse():
         self.response = response
 
     def data(self):
-        reponse_json = self.response.json()
-        return self._parse_get_search(reponse_json)
+        response_json = self.response.json()
+        return self._parse_get_search(response_json)
 
-    def _parse_get_search(self, reponse_json):
+    def _parse_get_search(self, response_json):
 
         columns = ['cod_cvm', 'empresa', 'categoria', 'tipo', 'especie', 'ref_date',
                    'data_entrega', 'status', 'version', 'modalidade', "acoes", "outros"]
@@ -31,7 +31,7 @@ class GetSearchResponse():
         response_df = pd.DataFrame(
             columns=columns+addtional_columns+download_columns)
 
-        dados = reponse_json["d"]["dados"]
+        dados = response_json["d"]["dados"]
 
         if dados:
             data = dados.replace("<spanOrder>", "")
