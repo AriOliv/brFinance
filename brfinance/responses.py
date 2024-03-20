@@ -41,7 +41,7 @@ class GetSearchResponse():
 
             search_results_df = search_results_df[pd.notnull(
                 search_results_df['acoes'])]
-
+    
             if not search_results_df.empty:
                 # Obtem coluna de links
                 search_results_df.loc[
@@ -72,10 +72,12 @@ class GetSearchResponse():
                 search_results_df['cod_cvm'] = search_results_df['cod_cvm'].str.replace(
                     r'\D+', '', regex=True)
 
-                search_results_df = search_results_df.replace(
-                    {'</spanOrder>': ''}, regex=True).sort_values('data_entrega', ascending=False)
-
-                # response_df = response_df.append(search_results_df)
+                try:
+                    search_results_df = search_results_df.replace(
+                        {'</spanOrder>': ''}, regex=False).sort_values('data_entrega', ascending=False)
+                except Exception as e:
+                    print(e)
+                
                 response_df = pd.concat([response_df,search_results_df], ignore_index=True)
 
 

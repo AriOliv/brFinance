@@ -70,6 +70,17 @@ class CVMAsyncBackend():
         response_class = GetReportResponse(response=response, previous_results=previous_results)
 
         return response_class.data()
+    
+    def get_report_2(
+            self,
+            NumeroProtocoloEntrega,
+            previous_results=False):
+        response = self._http_client().get_reports_2(
+            NumeroProtocoloEntrega)
+        
+        response_class = GetReportResponse(response=response, previous_results=previous_results)
+
+        return response_class.data()
 
     def get_cvm_codes(self):
         response = self._http_client().get_enet_consulta_externa()
