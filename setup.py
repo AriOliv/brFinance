@@ -19,13 +19,13 @@ install_requires = [
 
 setuptools.setup(
     name='brfinance',
-    version='0.0.9',
+    version='2.0',
     packages=setuptools.find_packages(),
     python_requires='>=3.7',
-    author='Eudes Rodrigo Nunes de Oliveira',
+    author='Eudes Rodrigo Nunes de Oliveira && Ari Oliveira',
     author_email='eudesrodrigo@outlook.com',
     description=(
-        'Biblioteca em Python com o objetivo de facilitar o acesso a '
+        'Fork Ari Oliviera - Biblioteca em Python com o objetivo de facilitar o acesso a '
         'dados financeiros periodicos de empresas brasileiras(B3/CVM).'
     ),
     long_description=long_description,
