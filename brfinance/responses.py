@@ -118,7 +118,7 @@ class GetReportResponse():
         converters = {c: lambda x: str(x) for c in df.columns}
         df = pd.read_html(io.StringIO(html), header=0, decimal=',',
                           converters=converters)[table_index]
-        print(html)
+
         for ind, column in enumerate(df.columns):
             if column.strip() != "Conta" and column.strip() != "Descrição":
                 df[column] = df[column].astype(str).str.strip().str.replace(".", "", regex=False)
@@ -135,9 +135,6 @@ class GetReportResponse():
 
                 df = df.set_axis([*df.columns[:-1], 'Valor'], axis=1)
 
-        # df["refDate"] = reference_date
-        #df["refDate"] = pd.to_datetime(df["refDate"], errors="coerce")
-        # df["document_version"] = document_version
         df["currency_unit"] = currency_unit
 
         return df
