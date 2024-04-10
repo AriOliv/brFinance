@@ -5,7 +5,10 @@ from datetime import date
 
 from brfinance.connector import CVMHttpClientConnector
 from brfinance.constants import BOOL_STRING_MAPPER, ENET_URL
-from brfinance.utils import extract_substring
+from brfinance.utils import extract_substring, parse_stock_amount
+
+import pandas as pd
+from io import StringIO
 
 logger = logging.getLogger(__name__)
 
@@ -96,62 +99,29 @@ class CVMHttpClient():
             self.LISTAR_DOCUMENTOS_URL, data=data, headers=headers, verify=False)
         return resp
 
-    def get_reports_2(self, NumeroProtocoloEntrega, reports_list=None):
-        url = f"{self.ENETCONSULTA_URL}frmExibirArquivoIPEExterno.aspx?NumeroProtocoloEntrega={NumeroProtocoloEntrega}"
+    def get_stocks_number(self, NumeroSequencialDocumento, CodigoTipoInstituicao):
+        url = f"{self.ENETCONSULTA_URL}frmGerenciaPaginaFRE.aspx?NumeroSequencialDocumento={NumeroSequencialDocumento}&CodigoTipoInstituicao={CodigoTipoInstituicao}"
 
         payload = {}
-        headers = {}
 
-        response = self.session.get(
-            url, headers=headers, data=payload, verify=False)
-
-        # print("URL",url)
-        # print("**********************")
-        # print("RESPONSE",response.text)
-        # print("**********************")
+        response = self.session.post(
+            url, headers={}, data=payload, verify=False)
 
         soup = BeautifulSoup(response.text, features="lxml")
 
-        # print(soup.find(id='hdnNumeroSequencialDocumento').attrs)
+        cookies = self.session.cookies.get_dict()
 
-        hdnNumeroSequencialDocumento = soup.find(
-            id='hdnNumeroSequencialDocumento').attrs["value"]
-        hdnCodigoTipoDocumento = soup.find(
-            id='hdnCodigoTipoDocumento').attrs["value"]
-        # hdnCodigoCvm = soup.find(id='hdnCodigoCvm').attrs["value"]
-        # hdnDescricaoDocumento = soup.find(id='hdnDescricaoDocumento').attrs["value"]
-        hdnCodigoInstituicao = soup.find(
-            id='hdnCodigoInstituicao').attrs["value"]
-        hdnHash = soup.find(id='hdnHash').attrs["value"]
+        hdnHash = soup.find(
+            id='hdnHash').attrs["value"]
+        
+        url_ = f"{self.ENETCONSULTA_URL}frmDadosComposicaoCapitalITR.aspx?Grupo=Dados+da+Empresa&Quadro=Composi%c3%a7%c3%a3o+do+Capital&NumeroSequencialDocumento={NumeroSequencialDocumento}&Hash={hdnHash}"
+        
+        response = self.session.get(
+            url_, cookies=cookies, verify=False)
 
-        NumeroSequencialRegistroCvm = extract_substring(
-            "NumeroSequencialRegistroCvm=", "&", response.text)
-
-        end_of_report_url = f"&CodTipoDocumento={hdnCodigoTipoDocumento}&NumeroSequencialDocumento={hdnNumeroSequencialDocumento}&NumeroSequencialRegistroCvm={NumeroSequencialRegistroCvm}&CodigoTipoInstituicao={hdnCodigoInstituicao}&Hash={hdnHash}"
-
-        reports = {}
-        opt = str(BeautifulSoup(response.text,
-                  features="lxml").find(id='cmbQuadro'))
-        reports_options = BeautifulSoup(opt, features="lxml")
-        reports_options = reports_options.find_all('option')
-
-        if (reports_list is None):
-            reports_list = [item.getText() for item in reports_options]
-
-        for item in reports_options:
-            if (item.getText() in reports_list):
-                report_url = self.ENETCONSULTA_URL + \
-                    item.attrs["value"] + end_of_report_url
+        df = pd.read_html(StringIO(response.text))[0]
                 
-                report_html_response = self.session.get(
-                    report_url, headers=headers, verify=False)
-                
-                reports[item.getText()] = report_html_response
-                # print("REP -->",report_url)
-                # print("RESP --->",report_html_response.text)
-                # print("UEIOA",reports[item.getText()].text)
-        # print("REPORTS",reports)
-        return reports
+        return parse_stock_amount(df)
     
     def get_reports(self, NumeroSequencialDocumento, CodigoTipoInstituicao, reports_list=None):
         url = f"{self.ENETCONSULTA_URL}frmGerenciaPaginaFRE.aspx?NumeroSequencialDocumento={NumeroSequencialDocumento}&CodigoTipoInstituicao={CodigoTipoInstituicao}"
@@ -162,29 +132,21 @@ class CVMHttpClient():
         response = self.session.get(
             url, headers=headers, data=payload, verify=False)
 
-        # print("URL",url)
-        # print("**********************")
-        # print("RESPONSE",response.text)
-        # print("**********************")
-
         soup = BeautifulSoup(response.text, features="lxml")
 
-        # print(soup.find(id='hdnNumeroSequencialDocumento').attrs)
 
-        hdnNumeroSequencialDocumento = soup.find(
+        self.hdnNumeroSequencialDocumento = soup.find(
             id='hdnNumeroSequencialDocumento').attrs["value"]
-        hdnCodigoTipoDocumento = soup.find(
+        self.hdnCodigoTipoDocumento = soup.find(
             id='hdnCodigoTipoDocumento').attrs["value"]
-        # hdnCodigoCvm = soup.find(id='hdnCodigoCvm').attrs["value"]
-        # hdnDescricaoDocumento = soup.find(id='hdnDescricaoDocumento').attrs["value"]
-        hdnCodigoInstituicao = soup.find(
+        self.hdnCodigoInstituicao = soup.find(
             id='hdnCodigoInstituicao').attrs["value"]
-        hdnHash = soup.find(id='hdnHash').attrs["value"]
+        self.hdnHash = soup.find(id='hdnHash').attrs["value"]
 
-        NumeroSequencialRegistroCvm = extract_substring(
+        self.NumeroSequencialRegistroCvm = extract_substring(
             "NumeroSequencialRegistroCvm=", "&", response.text)
 
-        end_of_report_url = f"&CodTipoDocumento={hdnCodigoTipoDocumento}&NumeroSequencialDocumento={hdnNumeroSequencialDocumento}&NumeroSequencialRegistroCvm={NumeroSequencialRegistroCvm}&CodigoTipoInstituicao={hdnCodigoInstituicao}&Hash={hdnHash}"
+        end_of_report_url = f"&CodTipoDocumento={self.hdnCodigoTipoDocumento}&NumeroSequencialDocumento={self.hdnNumeroSequencialDocumento}&NumeroSequencialRegistroCvm={self.NumeroSequencialRegistroCvm}&CodigoTipoInstituicao={self.hdnCodigoInstituicao}&Hash={self.hdnHash}"
 
         reports = {}
         opt = str(BeautifulSoup(response.text,
@@ -204,10 +166,7 @@ class CVMHttpClient():
                     report_url, headers=headers, verify=False)
                 
                 reports[item.getText()] = report_html_response
-                # print("REP -->",report_url)
-                # print("RESP --->",report_html_response.text)
-                # print("UEIOA",reports[item.getText()].text)
-        # print("REPORTS",reports)
+
         return reports
 
     def get_enet_consulta_externa(self):

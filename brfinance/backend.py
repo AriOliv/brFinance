@@ -67,20 +67,20 @@ class CVMAsyncBackend():
             CodigoTipoInstituicao,
             reports_list)
         
-        response_class = GetReportResponse(response=response, previous_results=previous_results)
+        response_class = GetReportResponse(response=response[0], previous_results=previous_results)
 
-        return response_class.data()
+        return response_class.data(), response[1]
     
-    def get_report_2(
+    def get_stocks_number(
             self,
-            NumeroProtocoloEntrega,
-            previous_results=False):
-        response = self._http_client().get_reports_2(
-            NumeroProtocoloEntrega)
+            NumeroSequencialDocumento,
+            CodigoTipoInstituicao):
+        response = self._http_client().get_stocks_number(
+            NumeroSequencialDocumento,
+            CodigoTipoInstituicao,
+            )
         
-        response_class = GetReportResponse(response=response, previous_results=previous_results)
-
-        return response_class.data()
+        return response
 
     def get_cvm_codes(self):
         response = self._http_client().get_enet_consulta_externa()
